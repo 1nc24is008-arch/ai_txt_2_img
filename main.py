@@ -8,7 +8,7 @@ st.set_page_config(page_title="Genz Image AI", layout="centered")
 st.title("🖼️ Genz – AI Image Generator")
 
 # Set Replicate API Key
-os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_API_KEY"]
+os.environ["REPLICATE_API_TOKEN"] = st.secrets["app2"]
 
 # Input prompt
 prompt = st.text_area("Enter your image prompt")
