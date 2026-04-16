@@ -1,51 +1,52 @@
 import streamlit as st
-import requests
+import replicate
+import os
 
 # Page Config
 st.set_page_config(page_title="Genz Image AI", layout="centered")
 
 st.title("🖼️ Genz – AI Image Generator")
 
+# Set Replicate API Key
+os.environ["REPLICATE_API_TOKEN"] = st.secrets["REPLICATE_API_KEY"]
+
 # Input prompt
 prompt = st.text_area("Enter your image prompt")
 
-# Function to generate image
+# Generate Image Function
 def generate_image(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-    headers = {
-        "Authorization": f"Bearer {st.secrets['new']}"
-    }
-
-    response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
-
-    if response.status_code == 200:
-        return response.content
-    else:
-        return None
+    output = replicate.run(
+        "stability-ai/sdxl:latest",
+        input={
+            "prompt": prompt,
+            "width": 1024,
+            "height": 1024
+        }
+    )
+    return output[0]   # returns image URL
 
 # Button
 if st.button("Generate Image"):
     if prompt:
         with st.spinner("Generating image... 🎨"):
-            img = generate_image(prompt)
+            try:
+                img_url = generate_image(prompt)
 
-            if img:
-                st.image(img, caption="Generated Image", use_column_width=True)
+                st.image(img_url, caption="Generated Image", use_column_width=True)
 
-                # Save to session
-                st.session_state.image = img
+                # Save in session
+                st.session_state.image = img_url
 
                 st.success("Image generated successfully ✅")
-            else:
-                st.error("Failed to generate image ❌")
+
+            except Exception as e:
+                st.error("Error generating image ❌")
+                st.exception(e)
     else:
         st.warning("Please enter a prompt")
 
 # Download option
 if "image" in st.session_state:
-    st.download_button(
-        label="⬇️ Download Image",
-        data=st.session_state.image,
-        file_name="ai_image.png",
-        mime="image/png"
-    )
+    st.markdown("### Download Image")
+
+    st.markdown(f"[Click here to download]({st.session_state.image})")
