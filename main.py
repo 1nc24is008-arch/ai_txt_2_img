@@ -13,7 +13,7 @@ prompt = st.text_area("Enter your image prompt")
 def generate_image(prompt):
     API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
     headers = {
-        "Authorization": f"Bearer {st.secrets['HF_API_KEY']}"
+        "Authorization": f"Bearer {st.secrets['new']}"
     }
 
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
