@@ -1,36 +1,39 @@
 import streamlit as st
 import requests
 
-# -------------------- PAGE CONFIG --------------------
 st.set_page_config(page_title="Genz Image AI", layout="centered")
-
 st.title("🖼️ Genz – AI Image Generator")
 
-# -------------------- API CONFIG --------------------
 API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
 
 headers = {
-    "Authorization": "Bearer Dear_AI"   # 🔑 PUT YOUR TOKEN HERE
+    "Authorization": "Bearer Dear_AI"
 }
 
-# -------------------- INPUT --------------------
 prompt = st.text_area("Enter your image prompt")
 
-# -------------------- FUNCTION --------------------
 def generate_image(prompt):
     response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
-    return response.content
+    return response
 
-# -------------------- BUTTON --------------------
 if st.button("Generate Image"):
     if prompt:
         with st.spinner("Generating image... 🎨"):
             try:
-                image_bytes = generate_image(prompt)
-                st.image(image_bytes)
+                response = generate_image(prompt)
 
-                st.session_state.image = image_bytes
-                st.success("Image generated ✅")
+                # ✅ CHECK RESPONSE TYPE
+                if response.status_code == 200:
+                    image_bytes = response.content
+                    st.image(image_bytes)
+
+                    st.session_state.image = image_bytes
+                    st.success("Image generated ✅")
+
+                else:
+                    # ❌ SHOW REAL ERROR
+                    st.error("API Error ❌")
+                    st.write(response.json())
 
             except Exception as e:
                 st.error("Error ❌")
@@ -38,7 +41,7 @@ if st.button("Generate Image"):
     else:
         st.warning("Enter a prompt")
 
-# -------------------- DOWNLOAD --------------------
+# DOWNLOAD
 if "image" in st.session_state:
     st.download_button(
         "📥 Download",
