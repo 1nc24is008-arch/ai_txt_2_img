@@ -1,42 +1,42 @@
 import streamlit as st
-import replicate
-import os
+import requests
 
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(page_title="Genz Image AI", layout="centered")
 
-st.title("🖼️ Genz – AI Image Generator")
+st.title("🖼️ Genz – AI Image Generator (FREE)")
 
-# -------------------- API KEY --------------------
-# Make sure you added this in Streamlit secrets:
-# app2 = "your_replicate_api_key"
-os.environ["REPLICATE_API_TOKEN"] = st.secrets["app2"]
+# -------------------- API CONFIG --------------------
+# Get your free token from Hugging Face
+API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+headers = {
+    "Authorization": "Bearer YOUR_HF_TOKEN"   # 🔑 Replace this
+}
 
 # -------------------- INPUT --------------------
 prompt = st.text_area("Enter your image prompt")
 
-# -------------------- IMAGE GENERATION FUNCTION --------------------
+# -------------------- FUNCTION --------------------
 def generate_image(prompt):
-    output = replicate.run(
-        "stability-ai/stable-diffusion",
-        input={
-            "prompt": prompt
-        }
+    response = requests.post(
+        API_URL,
+        headers=headers,
+        json={"inputs": prompt}
     )
-    return output[0]
+    return response.content
 
 # -------------------- BUTTON --------------------
 if st.button("Generate Image"):
     if prompt:
         with st.spinner("Generating image... 🎨"):
             try:
-                img_url = generate_image(prompt)
+                image_bytes = generate_image(prompt)
 
-                # Show Image
-                st.image(img_url, caption="Generated Image", use_column_width=True)
+                # Show image
+                st.image(image_bytes, caption="Generated Image")
 
-                # Save in session
-                st.session_state.image = img_url
+                # Save to session
+                st.session_state.image = image_bytes
 
                 st.success("Image generated successfully ✅")
 
@@ -46,7 +46,11 @@ if st.button("Generate Image"):
     else:
         st.warning("Please enter a prompt")
 
-# -------------------- DOWNLOAD SECTION --------------------
+# -------------------- DOWNLOAD --------------------
 if "image" in st.session_state:
-    st.markdown("### 📥 Download Image")
-    st.markdown(f"[Click here to download]({st.session_state.image})")
+    st.download_button(
+        label="📥 Download Image",
+        data=st.session_state.image,
+        file_name="generated_image.png",
+        mime="image/png"
+    )
