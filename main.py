@@ -2,21 +2,23 @@ import streamlit as st
 import replicate
 import os
 
-# Page Config
+# -------------------- PAGE CONFIG --------------------
 st.set_page_config(page_title="Genz Image AI", layout="centered")
 
 st.title("🖼️ Genz – AI Image Generator")
 
-# Set Replicate API Key
+# -------------------- API KEY --------------------
+# Make sure you added this in Streamlit secrets:
+# app2 = "your_replicate_api_key"
 os.environ["REPLICATE_API_TOKEN"] = st.secrets["app2"]
 
-# Input prompt
+# -------------------- INPUT --------------------
 prompt = st.text_area("Enter your image prompt")
 
-# Generate Image Function
+# -------------------- IMAGE GENERATION FUNCTION --------------------
 def generate_image(prompt):
     output = replicate.run(
-        "stability-ai/sdxl:latest",
+        "stability-ai/sdxl:1.0",   # ✅ FIXED MODEL VERSION
         input={
             "prompt": prompt,
             "width": 1024,
@@ -25,13 +27,14 @@ def generate_image(prompt):
     )
     return output[0]   # returns image URL
 
-# Button
+# -------------------- BUTTON --------------------
 if st.button("Generate Image"):
     if prompt:
         with st.spinner("Generating image... 🎨"):
             try:
                 img_url = generate_image(prompt)
 
+                # Show Image
                 st.image(img_url, caption="Generated Image", use_column_width=True)
 
                 # Save in session
@@ -45,8 +48,7 @@ if st.button("Generate Image"):
     else:
         st.warning("Please enter a prompt")
 
-# Download option
+# -------------------- DOWNLOAD SECTION --------------------
 if "image" in st.session_state:
-    st.markdown("### Download Image")
-
+    st.markdown("### 📥 Download Image")
     st.markdown(f"[Click here to download]({st.session_state.image})")
