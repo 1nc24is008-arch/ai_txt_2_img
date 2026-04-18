@@ -18,14 +18,12 @@ prompt = st.text_area("Enter your image prompt")
 # -------------------- IMAGE GENERATION FUNCTION --------------------
 def generate_image(prompt):
     output = replicate.run(
-        "stability-ai/sdxl:1.0",   # ✅ FIXED MODEL VERSION
+        "stability-ai/stable-diffusion",
         input={
-            "prompt": prompt,
-            "width": 1024,
-            "height": 1024
+            "prompt": prompt
         }
     )
-    return output[0]   # returns image URL
+    return output[0]
 
 # -------------------- BUTTON --------------------
 if st.button("Generate Image"):
