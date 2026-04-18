@@ -7,14 +7,13 @@ st.title("🖼️ Genz – AI Image Generator")
 API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
 
 headers = {
-    "Authorization": "Bearer Dear_AI"
+    "Authorization": "Dear_AI"
 }
 
 prompt = st.text_area("Enter your image prompt")
 
 def generate_image(prompt):
-    response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
-    return response
+    return requests.post(API_URL, headers=headers, json={"inputs": prompt})
 
 if st.button("Generate Image"):
     if prompt:
@@ -22,18 +21,20 @@ if st.button("Generate Image"):
             try:
                 response = generate_image(prompt)
 
-                # ✅ CHECK RESPONSE TYPE
-                if response.status_code == 200:
-                    image_bytes = response.content
-                    st.image(image_bytes)
-
-                    st.session_state.image = image_bytes
+                # ✅ CASE 1: IMAGE SUCCESS
+                if response.status_code == 200 and "image" in response.headers.get("content-type", ""):
+                    st.image(response.content)
+                    st.session_state.image = response.content
                     st.success("Image generated ✅")
 
+                # ❌ CASE 2: ERROR RESPONSE
                 else:
-                    # ❌ SHOW REAL ERROR
                     st.error("API Error ❌")
-                    st.write(response.json())
+
+                    try:
+                        st.write(response.json())  # if JSON
+                    except:
+                        st.write(response.text)   # if not JSON
 
             except Exception as e:
                 st.error("Error ❌")
