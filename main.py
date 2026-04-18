@@ -4,8 +4,7 @@ import requests
 st.set_page_config(page_title="Genz Image AI", layout="centered")
 st.title("🖼️ Genz – AI Image Generator")
 
-API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
-
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
 headers = {
     "Authorization": "Dear_AI"
 }
